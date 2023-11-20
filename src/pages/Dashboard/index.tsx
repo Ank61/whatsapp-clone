@@ -17,6 +17,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Fab from '@mui/material/Fab';
 import MessageIcon from '@mui/icons-material/Message';
+import { useRouter } from 'next/router';
 
 const color = green[600];
 interface TabPanelProps {
@@ -24,11 +25,9 @@ interface TabPanelProps {
   index: number;
   value: number;
 }
-
 const CustomTabPanel = ({ value, index, children }: TabPanelProps) => {
   return value === index ? <div>{children}</div> : null;
 };
-
 function a11yProps(index: number) {
   return {
     id: `simple-tab-${index}`,
@@ -36,11 +35,13 @@ function a11yProps(index: number) {
   };
 }
 export default function Dashboard() {
+
   const [value, setValue] = useState(0);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [searchTouched, setSearchTouched] = useState<Boolean>(false);
   const dummyData = [{ name: "Jake" }, { name: "Ankit" }, { name: "Amit" }, { name: "Roonie" }, { name: "John" }]
   const open = Boolean(anchorEl);
+  const router = useRouter()
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -55,8 +56,8 @@ export default function Dashboard() {
   }
 
   return (
-    <>
-      <header className="bg-slate-800 h-14 min-h-full">
+    <div className="w-screen h-screen bg-gray-800">
+      <div className="bg-gray-800 h-14">
         <div className="flex text-slate-100 py-3">
           <div className="flex-auto w-60 px-4 text-2xl">
             <a className="underline decoration-green-600">Informally</a>
@@ -106,19 +107,19 @@ export default function Dashboard() {
             </Menu>
           </div>
         </div>
-      </header>
-      <Box sx={{ width: '100%', height: '91.7vh' }} className="bg-slate-800">
+      </div>
+      <Box className="bg-gray-800">
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs variant="fullWidth" value={value} onChange={handleChange} className="bg-slate-800 text-slate-200" aria-label="basic tabs example">
+          <Tabs variant="fullWidth" value={value} onChange={handleChange} className="bg-gray-800 text-slate-200" aria-label="basic tabs example">
             <Tab label="Chats" {...a11yProps(0)} className="text-slate-100 text-xs" />
             <Tab label="Updates" {...a11yProps(1)} className="text-slate-100 text-xs" />
             <Tab label="Calls" {...a11yProps(2)} className="text-slate-100 text-xs" />
           </Tabs>
         </Box>
         <CustomTabPanel value={value} index={0}>
-          <List className="bg-slate-800 text-white text-xs">
+          <List className="bg-gray-800 text-white text-xs">
             {dummyData?.map((item, index) => (
-              <ListItem key={index} disablePadding>
+              <ListItem key={index} disablePadding onClick={() => router.push("/Chat")}>
                 <ListItemButton>
                   <ListItemIcon>
                     <Avatar />
@@ -139,6 +140,6 @@ export default function Dashboard() {
           Item Three
         </CustomTabPanel>
       </Box>
-    </>
+    </div>
   );
 }
