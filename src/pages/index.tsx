@@ -3,10 +3,13 @@ import { fetchUser } from "@/Hooks/userHooks";
 import { useState } from "react";
 import toast, { Toaster } from 'react-hot-toast';
 import { useRouter } from 'next/router';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { userNameGlobal } from "@/Helper/recoilState";
 
 export default function Home() {
   const [userName, setUserName] = useState("");
-  const [password, setPassword] = useState("")
+  const [password, setPassword] = useState("");
+  const [savedState, setSavedState] = useRecoilState(userNameGlobal);
   const router = useRouter()
 
   const handleLogin = async (event: any) => {
@@ -15,6 +18,7 @@ export default function Home() {
     toast.promise(
       fetchUser({ username: userName, password }).then(resp => {
         if (resp.token) {  //will not take null,undefined values
+          setSavedState(resp._id)
           setTimeout(() => {
             router.push('/Dashboard');
           }, 1300);
