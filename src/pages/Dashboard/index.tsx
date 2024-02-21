@@ -44,7 +44,8 @@ export default function Dashboard() {
   const [value, setValue] = useState(0);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [searchTouched, setSearchTouched] = useState<Boolean>(false);
-  const globalUserName = useRecoilValue(userNameGlobal);
+  const { loggedInUser, chats, userName } = useRecoilValue(userNameGlobal);
+  const globalUserName = loggedInUser;
   const [friends, setfriends] = useState([]);
   const [savedState, setSavedState] = useRecoilState(privateUser);
 
@@ -180,7 +181,11 @@ export default function Dashboard() {
                     key={index}
                     disablePadding
                     onClick={() => {
-                      setSavedState(updatedString);
+                      setSavedState((prev) => ({
+                        ...prev,
+                        selectedName: updatedString,
+                        selectedId: item._id,
+                      }));
                       router.push("/Chat/[id]", `/Chat/${item._id}`);
                     }}
                   >

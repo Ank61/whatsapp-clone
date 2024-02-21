@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -18,15 +18,19 @@ import { useRecoilValue } from "recoil";
 import { userNameGlobal } from "@/Helper/recoilState";
 import { useRouter } from "next/router";
 import { privateUser } from "@/Helper/recoilState";
+import axios from "axios";
 
 const socket = io("http://localhost:8080");
+
 export default function SingleChat() {
   const router = useRouter();
   const { id } = router.query;
-  const [userName, setUserName] = useState();
-  const privateUserName = useRecoilValue(privateUser);
+  const divRef = useRef<HTMLDivElement>(null);
+  const { selectedId, selectedName } = useRecoilValue(privateUser);
+  const privateUserName = selectedName;
   console.log("Grtting id", privateUserName);
-  const globalUserName = useRecoilValue(userNameGlobal);
+  const { loggedInUser, chats, userName } = useRecoilValue(userNameGlobal);
+  const globalUserName = loggedInUser;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [chatInput, setChatInput] = useState<any>({
     id: globalUserName,
@@ -36,19 +40,70 @@ export default function SingleChat() {
   const openChat = Boolean(anchorEl);
   const [receiver, setReceiver] = useState("");
 
+  async function checkExecution() {
+    if (chats === "") {
+      //Create new user
+      const newUserData = {
+        userId: globalUserName,
+        connectingUser: selectedId,
+        chatId: "",
+      };
+      await axios
+        .post("http://localhost:8080/chat/insert", newUserData)
+        .then((response) => console.log("Inserted", response.data))
+        .catch((error) => console.log("Error in fecthing", error));
+    } else {
+      //Get intial Messages
+      const fetchData = {
+        chatId: chats,
+      };
+      await axios
+        .post("http://localhost:8080/chat/fetch", fetchData)
+        .then((response) => {
+          console.log("Fetching result : ", response.data);
+          setSenderChat(response?.data?.messages);
+        })
+        .catch((error) => console.log("Error occurded fetching", error));
+    }
+  }
+
   useEffect(() => {
+    checkExecution();
     socket.emit("setup", { user: globalUserName });
   }, []);
 
+  useLayoutEffect(() => {
+    if (divRef.current) {
+      const { scrollHeight, clientHeight } = divRef.current;
+      divRef.current.scrollTop = scrollHeight - clientHeight;
+    }
+  }, [divRef.current, senderChat]);
+
   useEffect(() => {
-    socket.on("message recieved", (newMessageRecieved) => {
+    socket.on("message recieved", async (newMessageRecieved) => {
       if (globalUserName || globalUserName === newMessageRecieved.to) {
         setReceiver(newMessageRecieved.id);
         setSenderChat([
           ...senderChat,
           { id: newMessageRecieved.to, message: newMessageRecieved.message },
         ]);
+        //Insert the incoming message into the database
+        //   const newUserData = {
+        //     userId: globalUserName,
+        //     connectingUser: selectedId,
+        //     chatId: chats,
+        //     incomingMessage: {
+        //       id: newMessageRecieved.to,
+        //       message: newMessageRecieved.message,
+        //     },
+        //   };
+        //   await axios
+        //     .post("http://localhost:8080/chat/insert", newUserData)
+        //     .then((response) => console.log("Inserted Incoming", response.data))
+        //     .catch((error) => console.log("Error in inserted incoming", error));
+        // }
       }
+      // );
     });
   });
 
@@ -58,8 +113,8 @@ export default function SingleChat() {
   const handleCloseChat = () => {
     setAnchorEl(null);
   };
-  const handleChatSubmit = () => {
-    setSenderChat([...senderChat, { to: id, message: chatInput }]);
+  const handleChatSubmit = async () => {
+    setSenderChat([...senderChat, { id: globalUserName, message: chatInput }]);
     socket.emit("new message", {
       to: id,
       message: chatInput,
@@ -70,6 +125,20 @@ export default function SingleChat() {
       id: globalUserName,
       message: "",
     });
+    ////Insert the outgoing message into the database
+    const newUserData = {
+      userId: globalUserName,
+      connectingUser: selectedId,
+      chatId: chats,
+      incomingMessage: {
+        id: globalUserName,
+        message: chatInput,
+      },
+    };
+    await axios
+      .post("http://localhost:8080/chat/insert", newUserData)
+      .then((response) => console.log("Inserted outgoing", response.data))
+      .catch((error) => console.log("Error in inserted incoming", error));
   };
   const handleInputChange = (event: any) => {
     const newValue = event.target.value;
@@ -77,9 +146,13 @@ export default function SingleChat() {
     setChatInput(formattedValue);
   };
   return (
-    <div className="bg-gray-800 w-screen h-screen">
-      <Box sx={{ flexGrow: 1 }} className="bg-gray-800">
-        <AppBar position="static" className="bg-gray-800 py-1.5">
+    <div className="w-screen h-screen" style={{ backgroundColor: "#1e292e" }}>
+      <Box sx={{ flexGrow: 1 }} style={{ backgroundColor: "#1f2c33" }}>
+        <AppBar
+          position="static"
+          className="py-1.5"
+          style={{ backgroundColor: "#1f2c33" }}
+        >
           <Toolbar>
             <IconButton
               size="medium"
@@ -140,14 +213,24 @@ export default function SingleChat() {
       <div className="text-slate-100">
         {JSON.stringify(privateUserName)} : {JSON.stringify(receiver)}
       </div>
-      <div className="text-slate-200 bg-gray-800">
+      <div
+        ref={divRef}
+        className="text-slate-100 "
+        style={{
+          backgroundColor: "#1e292e",
+          height: "63%",
+          overflowY: "auto",
+          overflowX: "hidden",
+        }}
+      >
         {/* --- Chat Messages --- */}
-
         {senderChat?.map((item: any, index: any) => {
           const shouldBreak = item.length > 10;
           const date = new Date();
           const hour = date.getHours();
           const time = date.getMinutes();
+          const formattedMinutes = String(time).padStart(2, "0");
+          console.log(hour, time, formattedMinutes);
           const formattedItem = shouldBreak
             ? item.replace(/(.{20})/g, "$1\n")
             : item;
@@ -155,18 +238,20 @@ export default function SingleChat() {
             <div
               key={index}
               className={`w-full h-max mt-2 ml-2 pr-10 mb-6 ${
-                item.id === globalUserName ? "text-left" : "text-right"
+                item.id !== globalUserName ? "text-left" : "text-right"
               }`}
             >
               <span
-                className={`text-right  rounded pl-2 pr-2 pt-1.5 pb-2 ${
-                  item.id === globalUserName ? "bg-[#6e6e6f]" : "bg-[#28a744]"
+                className={`text-right rounded pl-2 pr-2 pt-1.5 pb-2 ${
+                  item.id !== globalUserName ? "bg-[#424e54]" : "bg-[#0c5447]"
                 }`}
                 style={{ whiteSpace: "pre-line" }}
               >
-                <span>{formattedItem.message}</span><br></br>
-                <span style={{ fontSize: 12, color: "#dfdcdc" }}>
-                  {hour}:{time}
+                <span>
+                  {formattedItem.message}{" "}
+                  <span className="text-slate-400" style={{ fontSize: 11 }}>
+                    {hour}:{formattedMinutes}
+                  </span>
                 </span>
               </span>
             </div>
