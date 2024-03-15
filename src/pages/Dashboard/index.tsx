@@ -155,17 +155,17 @@ export default function Dashboard() {
             <Tab
               label="Chats"
               {...a11yProps(0)}
-              className="text-slate-100 text-xs"
+              className="text-xs" style={{color : 'white'}}
             />
             <Tab
               label="Updates"
               {...a11yProps(1)}
-              className="text-slate-100 text-xs"
+              className="text-xs" style={{color : 'white'}}
             />
             <Tab
               label="Calls"
               {...a11yProps(2)}
-              className="text-slate-100 text-xs"
+              className="text-xs" style={{color : 'white'}}
             />
           </Tabs>
         </Box>
@@ -204,11 +204,10 @@ export default function Dashboard() {
           </List>
           <Fab
             size="medium"
-            className="bg-green-400"
-            style={{ position: "fixed", bottom: "6%", right: "7%" }}
+            style={{ position: "fixed", bottom: "6%", right: "7%",backgroundColor : "transparent" }}
             aria-label="newMessage"
           >
-            <MessageIcon />
+            <MessageIcon style={{color : '#2ac54a' }}/>
           </Fab>
         </CustomTabPanel>
         ;

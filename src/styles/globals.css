@@ -6,3 +6,143 @@
     color : #2ac94d !important;
     border-bottom: 5px solid #2ac94d !important;
 }
+
+.chat-bubble {
+    background-color:#48545b;
+    margin-left: 7px;
+    padding:11px 23px;
+    -webkit-border-radius: 20px;
+    -webkit-border-bottom-left-radius: 2px;
+    -moz-border-radius: 20px;
+    -moz-border-radius-bottomleft: 2px;
+    border-radius: 20px;
+    border-bottom-left-radius: 2px;
+    display:inline-block;
+    transition: "bottom 0.3s ease";
+    /* padding-bottom: 10px; */
+  }
+  .typing {
+    align-items: center;
+    display: flex;
+    height: 17px;
+    padding-right: 6px;
+  }
+  .typing .dot {
+    animation: mercuryTypingAnimation 1.8s infinite ease-in-out;
+    background-color: #6CAD96 ;
+    border-radius: 50%;
+    height: 4px;
+    margin-right: 4px;
+    vertical-align: middle;
+    width: 4px;
+    display: inline-block;
+  }
+  .dot{
+    margin-top: 8px;
+  }
+  .typing .dot:nth-child(1) {
+    animation-delay: 200ms;
+  }
+  .typing .dot:nth-child(2) {
+    animation-delay: 300ms;
+  }
+  .typing .dot:nth-child(3) {
+    animation-delay: 400ms;
+  }
+  .typing .dot:last-child {
+    margin-right: 0;
+  }
+  
+  @keyframes mercuryTypingAnimation {
+    0% {
+      transform: translateY(0px);
+      background-color:#c7c9c8;
+    }
+    28% {
+      transform: translateY(-7px);
+      background-color:#c7c9c8; 
+    }
+    44% {
+      transform: translateY(0px);
+      background-color: #c7c9c8;
+    }
+  }
+
+
+  .spinner {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    margin-left: -75px;
+    margin-top: 10px;
+  }
+  
+  .spinner span {
+    position: absolute;
+    top: 50%;
+    left: var(--left);
+    width: 31px;
+    height: 5px;
+    background: #18534e;
+    animation: dominos 1s ease infinite;
+    box-shadow: 2px 2px 3px 0px #fefefe;
+  }
+  
+  .spinner span:nth-child(1) {
+    --left: 500%;
+    animation-delay: 0.125s;
+  }
+  
+  .spinner span:nth-child(2) {
+    --left: 480%;
+    animation-delay: 0.3s;
+  }
+  
+  .spinner span:nth-child(3) {
+    left: 460%;
+    animation-delay: 0.425s;
+  }
+  
+  .spinner span:nth-child(4) {
+    animation-delay: 0.54s;
+    left: 440%;
+  }
+  
+  .spinner span:nth-child(5) {
+    animation-delay: 0.665s;
+    left: 420%;
+  }
+  
+  .spinner span:nth-child(6) {
+    animation-delay: 0.79s;
+    left: 400%;
+  }
+  
+  .spinner span:nth-child(7) {
+    animation-delay: 0.915s;
+    left: 380%;
+  }
+  
+  .spinner span:nth-child(8) {
+    left: 360%;
+  }
+  
+  @keyframes dominos {
+    50% {
+      opacity: 0.7;
+    }
+  
+    75% {
+      -webkit-transform: rotate(90deg);
+      transform: rotate(90deg);
+    }
+  
+    80% {
+      opacity: 1;
+    }
+  }
+  
