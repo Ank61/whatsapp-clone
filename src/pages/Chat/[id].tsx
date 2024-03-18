@@ -57,6 +57,7 @@ export default function SingleChat() {
   const [requestIncoming, setRequestIncoming] = useState(false);
   const [waitingActive, setWaitingActive] = useState(false);
 
+  const suggestions = "Thanks for the help";
   // if (videoReady) {
   //   setTimeout(() => {
   //     debugger;
@@ -164,14 +165,14 @@ export default function SingleChat() {
     });
     socket.on("playPausedVideo", async (videoInfo) => {
       if (
-        (globalUserName && oppositeRef.current!==null) ||
-        (globalUserName === videoInfo.to && oppositeRef.current!==null)
+        (globalUserName && oppositeRef.current !== null) ||
+        (globalUserName === videoInfo.to && oppositeRef.current !== null)
       ) {
         oppositeRef.current.play();
       }
     });
   });
-  
+
   useEffect(() => {
     checkExecution();
     socket.emit("setup", { user: globalUserName });
@@ -183,7 +184,6 @@ export default function SingleChat() {
       divRef.current.scrollTop = scrollHeight - clientHeight;
     }
   }, [divRef.current, senderChat, chatInput]);
-
 
   useEffect(() => {
     const videoPlayer = videoRef.current;
@@ -236,7 +236,26 @@ export default function SingleChat() {
       .then((response) => console.log("Inserted outgoing", response.data))
       .catch((error) => console.log("Error in inserted incoming", error));
   };
-  const handleInputChange = (event: any) => {
+
+  function throttleInput (delay : number)  {
+    let lastExecuted = 0;
+    return function () {
+      const now = Date.now();
+      if (now - lastExecuted >= delay) {
+        console.log("Executed")
+        fetchSuggestionsAI();
+        lastExecuted = now;
+      }
+    };
+  };
+
+  function fetchSuggestionsAI() {
+    console.log("Throttle Executed" , suggestions);
+  }
+  
+
+  const  handleInputChange=(event: any)=> {
+    event.preventDefault()
     const newValue = event.target.value;
     const formattedValue = newValue.replace(/\n/g, " ");
     setChatInput(formattedValue);
@@ -246,7 +265,12 @@ export default function SingleChat() {
       from: globalUserName,
       messageId: null,
     });
-  };
+    //setInterval(()=>{
+      throttleSuggestions()
+    //   console.log("Exection proceeds...")
+    // },500)
+  }
+
   const handleEmojiChange = (emoji: any) => {
     setChatInput(chatInput + emoji.emoji);
     setEmojiTouched(false);
@@ -255,6 +279,7 @@ export default function SingleChat() {
   const handleClose = () => {
     setVideoSharing(false);
   };
+
   const handleVideoSharing = () => {
     debugger;
     setWaitingActive(true);
@@ -335,6 +360,7 @@ export default function SingleChat() {
       });
     }
   };
+
   const handlePlayForUser = () => {
     debugger;
     // socket.emit("playPausedVideo", {
@@ -343,6 +369,8 @@ export default function SingleChat() {
     //   play : true,
     // });
   };
+
+  const throttleSuggestions = throttleInput(30000);
 
   return (
     <div className="w-screen h-screen" style={{ backgroundColor: "#1e292e" }}>
