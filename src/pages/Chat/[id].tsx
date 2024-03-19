@@ -25,7 +25,9 @@ import OndemandVideoIcon from "@mui/icons-material/OndemandVideo";
 import backgroundImage from "../../Images/back.jpg";
 import Modal from "@mui/material/Modal";
 import { Input } from "@mui/material";
-import Hls from "hls.js";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import Tooltip from "@mui/material/Tooltip";
+import Zoom from '@mui/material/Zoom';
 
 const socket = io("http://localhost:8080");
 
@@ -56,8 +58,9 @@ export default function SingleChat() {
   const [responseVideoSharing, setResponseVideoSharing] = useState("");
   const [requestIncoming, setRequestIncoming] = useState(false);
   const [waitingActive, setWaitingActive] = useState(false);
-
-  const suggestions = "Thanks for the help";
+  const [suggestionsFetched, setSuggestionsFecthed] = useState("");
+  const [suggest, setSuggest] = useState(false);
+  const [suggestPresent, setSuggestPresent] = useState("");
   // if (videoReady) {
   //   setTimeout(() => {
   //     debugger;
@@ -237,25 +240,33 @@ export default function SingleChat() {
       .catch((error) => console.log("Error in inserted incoming", error));
   };
 
-  function throttleInput (delay : number)  {
-    let lastExecuted = 0;
-    return function () {
-      const now = Date.now();
-      if (now - lastExecuted >= delay) {
-        console.log("Executed")
-        fetchSuggestionsAI();
-        lastExecuted = now;
-      }
+  function debounce<T extends Function>(
+    func: T,
+    delay: number
+  ): (...args: any[]) => void {
+    let timerId: ReturnType<typeof setTimeout>;
+    return function (this: any, ...args: any[]) {
+      clearTimeout(timerId);
+      timerId = setTimeout(() => {
+        func.apply(this, args);
+      }, delay);
     };
-  };
-
-  function fetchSuggestionsAI() {
-    console.log("Throttle Executed" , suggestions);
   }
-  
 
-  const  handleInputChange=(event: any)=> {
-    event.preventDefault()
+  // Example usage:
+  function handleSuggestionAPI() {
+    console.log("Scrolled!");
+    //Call API to fetch suggestions
+    //Dummy suggestions
+    const sugestions = "Thanks for the help";
+    setSuggest(true);
+    setSuggestionsFecthed(sugestions);
+  }
+
+  const debouncedScrollHandler = debounce(handleSuggestionAPI, 2000);
+
+  const handleInputChange = (event: any) => {
+    event.preventDefault();
     const newValue = event.target.value;
     const formattedValue = newValue.replace(/\n/g, " ");
     setChatInput(formattedValue);
@@ -265,11 +276,7 @@ export default function SingleChat() {
       from: globalUserName,
       messageId: null,
     });
-    //setInterval(()=>{
-      throttleSuggestions()
-    //   console.log("Exection proceeds...")
-    // },500)
-  }
+  };
 
   const handleEmojiChange = (emoji: any) => {
     setChatInput(chatInput + emoji.emoji);
@@ -369,8 +376,6 @@ export default function SingleChat() {
     //   play : true,
     // });
   };
-
-  const throttleSuggestions = throttleInput(30000);
 
   return (
     <div className="w-screen h-screen" style={{ backgroundColor: "#1e292e" }}>
@@ -709,20 +714,42 @@ export default function SingleChat() {
           type="text"
           style={{
             paddingLeft: 16,
-            borderRadius: 20,
+            borderTopLeftRadius: 20,
+            borderBottomLeftRadius: 20,
             backgroundColor: "#4b5563",
-            marginRight: 5,
           }}
           placeholder="Type a message"
-          className="w-screen focus:outline-none text-slate-100"
+          className={`${!suggest ? `inputSuggestionon`: `inputSuggestion`} w-screen focus:outline-none text-slate-100`}
           value={chatInput}
-          onChange={handleInputChange}
+          onChange={(event: any) => {
+            handleInputChange(event);
+            debouncedScrollHandler();
+          }}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
               handleChatSubmit();
             }
           }}
         />
+        <Tooltip title="Text Suggestions" arrow TransitionComponent={Zoom} >
+          <AutoAwesomeIcon
+          style={{
+            paddingTop:5,
+            paddingLeft:5,
+            paddingRight:14,
+            paddingBottom:5,
+            width : 40,
+            height : 40,
+            borderBottomRightRadius: 20,
+            borderTopRightRadius : 20,
+            backgroundColor: "#4b5563",
+          }}
+            onClick={() => setSuggest(!suggest)}
+            className={`${suggest ? `inputSuggestionRight`: `inputSuggestion`} cursor-pointer text-xl ${
+          suggest ? `text-green-400` : `text-gray-400`
+            }`}
+          />
+        </Tooltip>
         <IconButton
           className="bg-green-400 rounded-2xl text-xl"
           onClick={handleChatSubmit}
