@@ -27,7 +27,7 @@ import Modal from "@mui/material/Modal";
 import { Input } from "@mui/material";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import Tooltip from "@mui/material/Tooltip";
-import Zoom from '@mui/material/Zoom';
+import Zoom from "@mui/material/Zoom";
 
 const socket = io("http://localhost:8080");
 
@@ -60,17 +60,7 @@ export default function SingleChat() {
   const [waitingActive, setWaitingActive] = useState(false);
   const [suggestionsFetched, setSuggestionsFecthed] = useState("");
   const [suggest, setSuggest] = useState(false);
-  const [suggestPresent, setSuggestPresent] = useState("");
-  // if (videoReady) {
-  //   setTimeout(() => {
-  //     debugger;
-  //     socket.emit("matchTime", {
-  //       to: id,
-  //       from: globalUserName,
-  //       time : currentTime,
-  //     })
-  //   }, 2500);
-  // }
+  const [suggestPresent, setSuggestPresent] = useState(false);
 
   const style = {
     position: "absolute",
@@ -245,25 +235,33 @@ export default function SingleChat() {
     delay: number
   ): (...args: any[]) => void {
     let timerId: ReturnType<typeof setTimeout>;
+
     return function (this: any, ...args: any[]) {
       clearTimeout(timerId);
+
       timerId = setTimeout(() => {
         func.apply(this, args);
       }, delay);
     };
   }
-
   // Example usage:
-  function handleSuggestionAPI() {
+  async function handleSuggestionAPI() {
     console.log("Scrolled!");
     //Call API to fetch suggestions
     //Dummy suggestions
-    const sugestions = "Thanks for the help";
-    setSuggest(true);
-    setSuggestionsFecthed(sugestions);
+    await axios
+      .post("http://localhost:8080/ai/suggestions", { message: chatInput })
+      .then((resp) => {
+        let rawInputString = resp.data?.message?.content;
+        let slicedInput = rawInputString.slice(chatInput?.length - 1);
+        setSuggestPresent(true);
+        setSuggestionsFecthed(slicedInput);
+        console.log("Debounced", resp.data?.message?.content);
+      })
+      .catch((err) => console.log("Suggestin not working", err));
   }
 
-  const debouncedScrollHandler = debounce(handleSuggestionAPI, 2000);
+  const debouncedScrollHandler = debounce(handleSuggestionAPI, 4000);
 
   const handleInputChange = (event: any) => {
     event.preventDefault();
@@ -375,6 +373,11 @@ export default function SingleChat() {
     //   from: globalUserName,
     //   play : true,
     // });
+  };
+  const handleChatSuggestions = () => {
+    console.log("Clicked", chatInput, suggestionsFetched);
+    setChatInput(chatInput + suggestionsFetched);
+    setSuggestPresent(false);
   };
 
   return (
@@ -719,11 +722,15 @@ export default function SingleChat() {
             backgroundColor: "#4b5563",
           }}
           placeholder="Type a message"
-          className={`${!suggest ? `inputSuggestionon`: `inputSuggestion`} w-screen focus:outline-none text-slate-100`}
+          className={`text-slate-100 ${
+            !suggest ? `inputSuggestionon` : `inputSuggestion`
+          } w-screen focus:outline-none `}
           value={chatInput}
           onChange={(event: any) => {
             handleInputChange(event);
-            debouncedScrollHandler();
+            if (suggest && chatInput?.length > 0) {
+              debouncedScrollHandler();
+            }
           }}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
@@ -731,23 +738,35 @@ export default function SingleChat() {
             }
           }}
         />
-        <Tooltip title="Text Suggestions" arrow TransitionComponent={Zoom} >
+        {suggestPresent ? (
+          <div className="overwrite">{suggestionsFetched}</div>
+        ) : null}
+        {suggestPresent && chatInput?.length > 0 ? (
+          <div
+            onClick={handleChatSuggestions}
+            style={{ backgroundColor: "#4b5563" }}
+            className="w-64 cursor-pointer"
+          >
+            <div className="arrow animated cursor-pointer"></div>
+          </div>
+        ) : null}
+        <Tooltip title="Text Suggestions" arrow TransitionComponent={Zoom}>
           <AutoAwesomeIcon
-          style={{
-            paddingTop:5,
-            paddingLeft:5,
-            paddingRight:14,
-            paddingBottom:5,
-            width : 40,
-            height : 40,
-            borderBottomRightRadius: 20,
-            borderTopRightRadius : 20,
-            backgroundColor: "#4b5563",
-          }}
+            style={{
+              paddingTop: 5,
+              paddingLeft: 5,
+              paddingRight: 14,
+              paddingBottom: 5,
+              width: 40,
+              height: 40,
+              borderBottomRightRadius: 20,
+              borderTopRightRadius: 20,
+              backgroundColor: "#4b5563",
+            }}
             onClick={() => setSuggest(!suggest)}
-            className={`${suggest ? `inputSuggestionRight`: `inputSuggestion`} cursor-pointer text-xl ${
-          suggest ? `text-green-400` : `text-gray-400`
-            }`}
+            className={`${
+              !suggest ? `inputSuggestionRightOn` : `inputSuggestionRight`
+            } cursor-pointer text-xl`}
           />
         </Tooltip>
         <IconButton

@@ -175,7 +175,7 @@
     border-bottom: 2px solid transparent;
     outline: none;
     background-color: #f3f3f4;
-    color: #0d0c22;
+    /* color: #0d0c22; */
     transition: border-color 3s ease, background-color 3s ease, box-shadow 3s ease; /* Updated transition */
   }
   
@@ -197,17 +197,83 @@
     border-right: 2px solid transparent;
     border-bottom: 2px solid transparent;
     outline: none;
+    color : #2ac94d !important;
+    /* border-color: #2ac94d; */
     background-color: #f3f3f4;
-    transition: border-color 3s ease, background-color 3s ease, box-shadow 3s ease;
+    transition: border-color 3s ease, background-color 3s ease, box-shadow 3s ease !important;
   }
 
-  .inputSuggestionRight {
+  .inputSuggestionRightOn {
     outline: none;
-    border-top: 1px  solid transparent;
+    /* border-top: 1px  solid transparent;
     border-right: 1px solid transparent;
-    border-bottom: 1px solid transparent;
-     border-color: #2ac94d;
-    background-color: #fff;
-    /* box-shadow: 0 0 0 4px rgb(234 76 137 / 10%); */
+    border-bottom: 1px solid transparent; */
+    border-color: #2ac94d;
+    color : #b6b6b6 !important;
+  }
+ 
+  .arrow {
+    position: absolute;
+    bottom: 50%;
+    left: 62%;
+    margin-left:-20px;
+  }
+  .arrow:before,
+  .arrow:after{
+    content: '';
+    position: absolute;
+    top: 4px;
+    right: -24px;
+    width: 19px;
+    height: 2px;
+    border-radius: 10px;
+    display: block;
+    background: #2ac94d;
+    transform:rotate(45deg);
+    -webkit-transform:rotate(137deg); 
+  }
+  .arrow:after{
+    right: inherit;
+    left: 3px;
+    top : -7px;
+    transform:rotate(-45deg);
+    -webkit-transform:rotate(214deg); 
+  }
+   
+  .animated{
+    -webkit-animation: bounce 3s infinite;
+    animation: bounce 3s both infinite;
+  }
+   
+   
+  @-webkit-keyframes bounce {
+    0% {-webkit-transform: translateY(0); opacity: 0;}
+    60% { opacity: 1;}
+    100% {-webkit-transform: translateY(60px); opacity: 0}
+  }
+   
+  @-moz-keyframes bounce {
+    0% {-webkit-transform: translateY(0); opacity: 0;}
+    60% { opacity: 1;}
+    100% {-webkit-transform: translateY(60px); opacity: 0}
+  }
+   
+  @-o-keyframes bounce {
+    0% {-webkit-transform: translateY(0); opacity: 0;}
+    60% { opacity: 1;}
+    100% {-webkit-transform: translateY(60px); opacity: 0}
+  }
+  @keyframes bounce {
+    0% {-webkit-transform: translateY(0); opacity: 0;}
+    60% { opacity: 1;}
+    100% {-webkit-transform: translateX(60px); opacity: 0}
   }
   
+
+  .overwrite{
+     position: absolute;
+      top: 8px;
+       left: 137px;
+        color: #aeadad;
+         font-size: inherit; 
+  }
